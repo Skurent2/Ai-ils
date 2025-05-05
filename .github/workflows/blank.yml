@@ -1,0 +1,37 @@
+// Генерация текста через Hugging Face
+async function generateText() {
+  const prompt = document.getElementById("textPrompt").value;
+  const response = await fetch("https://api-inference.huggingface.co/models/gpt2", {
+    method: "POST",
+    headers: {
+      "Authorization": "Bearer YOUR_HUGGINGFACE_TOKEN", // Получите токен на https://huggingface.co/settings/tokens
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ inputs: prompt })
+  });
+  const data = await response.json();
+  document.getElementById("textContent").innerText = data[0]?.generated_text || "Ошибка";
+}
+
+// Генерация изображения через Replicate
+async function generateImage() {
+  const prompt = document.getElementById("imagePrompt").value;
+  const response = await fetch("https://api.replicate.com/v1/predictions", {
+    method: "POST",
+    headers: {
+      "Authorization": `Token r8_QWXvUBh59AqjYNgnFO2qXEGVGFdCx2o110ruM, // Получите токен на https://replicate.com/account/api-tokens
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      version: "stability-ai/sdxl:39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b",
+      input: { prompt: prompt }
+    })
+  });
+  const data = await response.json();
+  const imageUrl = data?.urls?.get_image_url;
+  if (imageUrl) {
+    document.getElementById("imageContent").innerHTML = `<img src="${imageUrl}" style="max-width:100%; border-radius:10px;">`;
+  } else {
+    document.getElementById("imageContent").innerText = "Ошибка генерации";
+  }
+}
